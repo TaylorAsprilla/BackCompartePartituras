@@ -29,7 +29,7 @@ export class Usuario {
     enum: UsuarioRol,
     default: UsuarioRol.MUSICO,
   })
-  rol: string;
+  rol: UsuarioRol;
 
   @Column({ nullable: true })
   foto: string;

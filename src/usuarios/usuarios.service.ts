@@ -68,7 +68,6 @@ export class UsuariosService {
       where: { isActive: true },
       take: limit,
       skip: offset,
-      relations: ['rol'], // Cargar relaciones (ajusta según tu entidad)
       order: { fecha_creacion: 'DESC' }, // Ordenar por fecha de creación (opcional)
     });
 
