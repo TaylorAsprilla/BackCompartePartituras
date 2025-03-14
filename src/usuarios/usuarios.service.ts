@@ -6,12 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
+import * as bcrypt from 'bcrypt';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Usuario } from './entities/usuario.entity';
 import { PaginationDto } from 'src/common/dtos/pagination.dtp';
 import { ConfigService } from '@nestjs/config';
+import { LoginUsuarioDto } from './dto';
 
 interface DBError {
   code: string;
@@ -28,9 +30,8 @@ export class UsuariosService {
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly configService: ConfigService,
-  ) {
-    console.log(configService.get('PORT'), process.env.PORT);
-  }
+    private readonly dataSource: DataSource,
+  ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     // Verificar si el email ya existe
@@ -53,9 +54,18 @@ export class UsuariosService {
     }
 
     try {
-      const usuario = this.usuarioRepository.create(createUsuarioDto);
+      const { password, ...userData } = createUsuarioDto;
+
+      const usuario = this.usuarioRepository.create({
+        ...userData,
+        password: bcrypt.hashSync(password, 10),
+      });
+
       await this.usuarioRepository.save(usuario);
+
       return usuario;
+
+      //TODO: Retornar el JWT de acceso y enviar el correo electrónico
     } catch (error) {
       this.handleDBExceptions(error);
     }
@@ -157,6 +167,38 @@ export class UsuariosService {
     } catch (error) {
       this.handleDBExceptions(error);
     }
+  }
+
+  async login(loginUsuarioDto: LoginUsuarioDto) {
+    const { numeroMita, email, password } = loginUsuarioDto;
+
+    let usuario: Usuario | null;
+
+    if (email) {
+      usuario = await this.usuarioRepository.findOne({
+        where: { email },
+        select: { password: true, email: true },
+      });
+    } else if (numeroMita) {
+      usuario = await this.usuarioRepository.findOne({
+        where: { numeroMita },
+        select: { password: true, numeroMita: true },
+      });
+    } else {
+      throw new BadRequestException('Debe proporcionar email o número Mita');
+    }
+
+    if (!usuario) {
+      throw new NotFoundException('Credenciales no válidas');
+    }
+
+    const isPasswordValid = bcrypt.compareSync(password, usuario.password);
+    if (!isPasswordValid) {
+      throw new BadRequestException('Credenciales no válidas');
+    }
+
+    // TODO: Retornar el JWT de acceso
+    return usuario;
   }
 
   private handleDBExceptions(error: unknown): never {

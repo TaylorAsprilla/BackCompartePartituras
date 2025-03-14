@@ -5,6 +5,10 @@ import { CommonModule } from './common/common.module';
 import { ConfigModule } from '@nestjs/config';
 import { EnvConfiguration } from './config/app.config';
 import { JoiValidationSchema } from './config/joi.validation';
+import { CategoriasModule } from './categorias/categorias.module';
+import { InstrumentosModule } from './instrumentos/instrumentos.module';
+import { PartiturasModule } from './partituras/partituras.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -24,6 +28,10 @@ import { JoiValidationSchema } from './config/joi.validation';
     }),
     UsuariosModule,
     CommonModule,
+    CategoriasModule,
+    InstrumentosModule,
+    PartiturasModule,
+    FilesModule,
   ],
 })
 export class AppModule {}

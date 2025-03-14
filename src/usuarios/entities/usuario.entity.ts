@@ -1,8 +1,11 @@
 import { UsuarioRol } from 'src/core/enums/rol.enum';
+import { Partitura } from 'src/partituras/entities/partitura.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -18,7 +21,7 @@ export class Usuario {
   @Column()
   nombre: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @Column({ unique: true })
@@ -42,4 +45,15 @@ export class Usuario {
 
   @UpdateDateColumn()
   fecha_actualizacion: Date;
+  @OneToMany(() => Partitura, (partitura) => partitura.usuario)
+  partituras: Partitura[];
+
+  @ManyToOne(() => Usuario, (usuario) => usuario.registrados, {
+    nullable: true,
+    eager: true,
+  })
+  registradoPor: Usuario;
+
+  @OneToMany(() => Usuario, (usuario) => usuario.registradoPor)
+  registrados: Usuario[];
 }

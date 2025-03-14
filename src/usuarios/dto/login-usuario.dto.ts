@@ -1,24 +1,16 @@
 import {
-  IsBoolean,
   IsEmail,
-  IsEnum,
   IsNumber,
-  IsOptional,
   IsPositive,
   IsString,
   Matches,
   MinLength,
 } from 'class-validator';
-import { UsuarioRol } from 'src/core/enums/rol.enum';
 
-export class CreateUsuarioDto {
+export class LoginUsuarioDto {
   @IsNumber()
   @IsPositive()
   numeroMita: number;
-
-  @IsString()
-  @MinLength(1)
-  nombre: string;
 
   @IsString()
   @MinLength(8)
@@ -31,20 +23,4 @@ export class CreateUsuarioDto {
   @IsString()
   @IsEmail()
   email: string;
-
-  @IsEnum(UsuarioRol)
-  @IsOptional()
-  rol: UsuarioRol = UsuarioRol.MUSICO;
-
-  @IsBoolean()
-  @IsOptional()
-  isActive: boolean = true;
-
-  @IsString()
-  @IsOptional()
-  foto?: string;
-
-  @IsNumber()
-  @IsOptional()
-  registradoPorId?: number;
 }
