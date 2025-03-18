@@ -15,6 +15,7 @@ import { FilesModule } from './files/files.module';
     ConfigModule.forRoot({
       load: [EnvConfiguration],
       validationSchema: JoiValidationSchema,
+      isGlobal: true,
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',

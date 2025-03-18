@@ -9,11 +9,12 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Usuario } from './entities/usuario.entity';
 import { PaginationDto } from 'src/common/dtos/pagination.dtp';
-import { ConfigService } from '@nestjs/config';
 import { LoginUsuarioDto } from './dto';
+import { JwtPayLoad } from './interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 interface DBError {
   code: string;
@@ -29,11 +30,10 @@ export class UsuariosService {
   constructor(
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
-    private readonly configService: ConfigService,
-    private readonly dataSource: DataSource,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
+  async create(createUsuarioDto: CreateUsuarioDto) {
     // Verificar si el email ya existe
     const existingUser = await this.usuarioRepository.findOne({
       where: { email: createUsuarioDto.email },
@@ -63,9 +63,13 @@ export class UsuariosService {
 
       await this.usuarioRepository.save(usuario);
 
-      return usuario;
-
-      //TODO: Retornar el JWT de acceso y enviar el correo electrónico
+      return {
+        ...usuario,
+        token: this.getJwtToken({
+          email: usuario.email,
+          numeroMita: usuario.numeroMita,
+        }),
+      };
     } catch (error) {
       this.handleDBExceptions(error);
     }
@@ -197,8 +201,19 @@ export class UsuariosService {
       throw new BadRequestException('Credenciales no válidas');
     }
 
-    // TODO: Retornar el JWT de acceso
-    return usuario;
+    // Retornar el JWT de acceso
+    return {
+      ...usuario,
+      token: this.getJwtToken({
+        email: usuario.email,
+        numeroMita: usuario.numeroMita,
+      }),
+    };
+  }
+
+  private getJwtToken(payload: JwtPayLoad) {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 
   private handleDBExceptions(error: unknown): never {

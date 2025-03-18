@@ -1,10 +1,11 @@
 import { UsuarioRol } from 'src/core/enums/rol.enum';
 import { Partitura } from 'src/partituras/entities/partitura.entity';
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -45,15 +46,17 @@ export class Usuario {
 
   @UpdateDateColumn()
   fecha_actualizacion: Date;
+
   @OneToMany(() => Partitura, (partitura) => partitura.usuario)
   partituras: Partitura[];
 
-  @ManyToOne(() => Usuario, (usuario) => usuario.registrados, {
-    nullable: true,
-    eager: true,
-  })
-  registradoPor: Usuario;
+  @BeforeInsert()
+  checkFieldsBeforeInsert() {
+    this.email = this.email.toLowerCase().trim();
+  }
 
-  @OneToMany(() => Usuario, (usuario) => usuario.registradoPor)
-  registrados: Usuario[];
+  @BeforeUpdate()
+  checkFieldsBeforeUpdate() {
+    this.email = this.email.toLowerCase().trim();
+  }
 }

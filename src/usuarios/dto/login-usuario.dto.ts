@@ -1,26 +1,25 @@
 import {
   IsEmail,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
-  Matches,
-  MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class LoginUsuarioDto {
+  @IsOptional()
   @IsNumber()
   @IsPositive()
-  numeroMita: number;
+  @ValidateIf((value: LoginUsuarioDto) => value.email === undefined)
+  numeroMita?: number;
 
-  @IsString()
-  @MinLength(8)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message:
-      'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.',
-  })
-  password: string;
-
+  @IsOptional()
   @IsString()
   @IsEmail()
-  email: string;
+  @ValidateIf((value: LoginUsuarioDto) => value.numeroMita === undefined)
+  email?: string;
+
+  @IsString()
+  password: string;
 }
