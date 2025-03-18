@@ -8,10 +8,16 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dtp';
 import { CreateUsuarioDto, LoginUsuarioDto, UpdateUsuarioDto } from './dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Usuario } from './entities/usuario.entity';
+import { GetUsuario, RawHeaders } from './decorators';
+import { Request } from 'express';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -30,6 +36,23 @@ export class UsuariosController {
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
     return this.usuariosService.findAll(paginationDto);
+  }
+
+  @Get('private')
+  @UseGuards(AuthGuard())
+  testingPrivateRoute(
+    @Req() request: Request,
+    @GetUsuario() usuario: Usuario,
+    @GetUsuario('email') usuarioEmail: string,
+    @RawHeaders() rawHeaders: string[],
+  ) {
+    return {
+      ok: true,
+      message: 'Petición exitosa',
+      usuario,
+      usuarioEmail,
+      rawHeaders,
+    };
   }
 
   @Get(':term')

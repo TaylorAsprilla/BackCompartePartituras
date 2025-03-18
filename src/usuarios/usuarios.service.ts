@@ -66,7 +66,7 @@ export class UsuariosService {
       return {
         ...usuario,
         token: this.getJwtToken({
-          email: usuario.email,
+          id: usuario.id,
           numeroMita: usuario.numeroMita,
         }),
       };
@@ -181,12 +181,12 @@ export class UsuariosService {
     if (email) {
       usuario = await this.usuarioRepository.findOne({
         where: { email },
-        select: { password: true, email: true },
+        select: { password: true, email: true, id: true },
       });
     } else if (numeroMita) {
       usuario = await this.usuarioRepository.findOne({
         where: { numeroMita },
-        select: { password: true, numeroMita: true },
+        select: { password: true, numeroMita: true, id: true },
       });
     } else {
       throw new BadRequestException('Debe proporcionar email o número Mita');
@@ -205,7 +205,7 @@ export class UsuariosService {
     return {
       ...usuario,
       token: this.getJwtToken({
-        email: usuario.email,
+        id: usuario.id,
         numeroMita: usuario.numeroMita,
       }),
     };

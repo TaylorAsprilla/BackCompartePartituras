@@ -21,13 +21,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayLoad): Promise<Usuario> {
-    const { email, numeroMita } = payload;
+    const { id, numeroMita } = payload;
 
     let usuario: Usuario | null;
 
-    if (email) {
+    if (id) {
       usuario = await this.usuarioRepository.findOne({
-        where: { email },
+        where: { id },
       });
     } else if (numeroMita) {
       usuario = await this.usuarioRepository.findOne({
