@@ -16,8 +16,11 @@ import { PaginationDto } from 'src/common/dtos/pagination.dtp';
 import { CreateUsuarioDto, LoginUsuarioDto, UpdateUsuarioDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Usuario } from './entities/usuario.entity';
-import { GetUsuario, RawHeaders } from './decorators';
+import { Auth, GetUsuario, RawHeaders } from './decorators';
 import { Request } from 'express';
+import { UsuarioRol } from 'src/core/enums/rol.enum';
+import { UsuarioRoleGuard } from './guards/usuario-role/usuario-role.guard';
+import { RoleProtected } from './decorators/role-protected.decorator';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -52,6 +55,27 @@ export class UsuariosController {
       usuario,
       usuarioEmail,
       rawHeaders,
+    };
+  }
+
+  @Get('private2')
+  @RoleProtected(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR, UsuarioRol.MUSICO)
+  @UseGuards(AuthGuard(), UsuarioRoleGuard)
+  privateRoute2(@GetUsuario() usuario: Usuario) {
+    return {
+      ok: true,
+      message: 'Petición exitosa',
+      usuario,
+    };
+  }
+
+  @Get('private3')
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR)
+  privateRoute3(@GetUsuario() usuario: Usuario) {
+    return {
+      ok: true,
+      message: 'Petición exitosa',
+      usuario,
     };
   }
 

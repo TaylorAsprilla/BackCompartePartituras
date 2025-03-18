@@ -4,8 +4,6 @@ export const RawHeaders = createParamDecorator(
   (data: string | undefined, ctx: ExecutionContext) => {
     const req = ctx.switchToHttp().getRequest();
 
-    console.log(req.rawHeaders);
-
     return req.rawHeaders;
   },
 );
