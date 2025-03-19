@@ -23,6 +23,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         signOptions: { expiresIn: '4h' },
       }),
     }),
+    UsuariosModule,
   ],
   exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
 })

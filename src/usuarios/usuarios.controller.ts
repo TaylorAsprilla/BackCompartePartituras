@@ -8,25 +8,19 @@ import {
   Delete,
   Query,
   ParseIntPipe,
-  UseGuards,
-  Req,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dtp';
 import { CreateUsuarioDto, LoginUsuarioDto, UpdateUsuarioDto } from './dto';
-import { AuthGuard } from '@nestjs/passport';
-import { Usuario } from './entities/usuario.entity';
-import { Auth, GetUsuario, RawHeaders } from './decorators';
-import { Request } from 'express';
+import { Auth } from './decorators';
 import { UsuarioRol } from 'src/core/enums/rol.enum';
-import { UsuarioRoleGuard } from './guards/usuario-role/usuario-role.guard';
-import { RoleProtected } from './decorators/role-protected.decorator';
 
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
   @Post('register')
+  @Auth(UsuarioRol.ADMIN)
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
     return this.usuariosService.create(createUsuarioDto);
   }
@@ -37,54 +31,19 @@ export class UsuariosController {
   }
 
   @Get()
+  @Auth(UsuarioRol.ADMIN)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.usuariosService.findAll(paginationDto);
   }
 
-  @Get('private')
-  @UseGuards(AuthGuard())
-  testingPrivateRoute(
-    @Req() request: Request,
-    @GetUsuario() usuario: Usuario,
-    @GetUsuario('email') usuarioEmail: string,
-    @RawHeaders() rawHeaders: string[],
-  ) {
-    return {
-      ok: true,
-      message: 'Petición exitosa',
-      usuario,
-      usuarioEmail,
-      rawHeaders,
-    };
-  }
-
-  @Get('private2')
-  @RoleProtected(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR, UsuarioRol.MUSICO)
-  @UseGuards(AuthGuard(), UsuarioRoleGuard)
-  privateRoute2(@GetUsuario() usuario: Usuario) {
-    return {
-      ok: true,
-      message: 'Petición exitosa',
-      usuario,
-    };
-  }
-
-  @Get('private3')
-  @Auth(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR)
-  privateRoute3(@GetUsuario() usuario: Usuario) {
-    return {
-      ok: true,
-      message: 'Petición exitosa',
-      usuario,
-    };
-  }
-
   @Get(':term')
+  @Auth(UsuarioRol.ADMIN)
   findOne(@Param('term') term: string) {
     return this.usuariosService.findOne(term);
   }
 
   @Patch(':numeroMita')
+  @Auth(UsuarioRol.ADMIN)
   update(
     @Param('numeroMita', ParseIntPipe) numeroMita: string,
     @Body() updateUsuarioDto: UpdateUsuarioDto,
@@ -93,6 +52,7 @@ export class UsuariosController {
   }
 
   @Delete(':numeroMita')
+  @Auth(UsuarioRol.ADMIN)
   remove(@Param('numeroMita') numeroMita: string) {
     return this.usuariosService.remove(+numeroMita);
   }

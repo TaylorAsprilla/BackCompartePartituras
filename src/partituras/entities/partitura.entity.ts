@@ -23,10 +23,12 @@ export class Partitura {
   @Column({ type: 'varchar', length: 255, nullable: false })
   pdf_url: string;
 
-  @ManyToOne(() => Usuario, (usuario) => usuario.partituras)
+  @ManyToOne(() => Usuario, (usuario) => usuario.partituras, { eager: true })
   usuario: Usuario;
 
-  @ManyToOne(() => Categoria, (categoria) => categoria.partituras)
+  @ManyToOne(() => Categoria, (categoria) => categoria.partituras, {
+    eager: true,
+  })
   categoria: Categoria;
 
   @CreateDateColumn()
