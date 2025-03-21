@@ -10,8 +10,6 @@ export const fileFilter = (
   const fileExtension = file.mimetype.split('/')[1];
   const validExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
 
-  console.log(file);
-
   if (validExtensions.includes(fileExtension)) {
     return callback(null, true);
   }

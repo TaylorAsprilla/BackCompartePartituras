@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ConexionesModule } from 'src/conexiones/conexiones.module';
 
 @Module({
   controllers: [UsuariosController],
@@ -20,10 +21,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '4h' },
+        signOptions: { expiresIn: '12h' },
       }),
     }),
     UsuariosModule,
+    ConexionesModule,
   ],
   exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
 })

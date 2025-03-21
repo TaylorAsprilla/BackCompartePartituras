@@ -25,11 +25,13 @@ export class InstrumentosController {
   }
 
   @Get()
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
   findAll() {
     return this.instrumentosService.findAll();
   }
 
   @Get(':id')
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
   findOne(@Param('id') id: string) {
     return this.instrumentosService.findOne(+id);
   }

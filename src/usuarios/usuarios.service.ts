@@ -15,6 +15,7 @@ import { PaginationDto } from 'src/common/dtos/pagination.dtp';
 import { LoginUsuarioDto } from './dto';
 import { JwtPayLoad } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
+import { ConexionesService } from 'src/conexiones/conexiones.service';
 
 interface DBError {
   code: string;
@@ -31,9 +32,10 @@ export class UsuariosService {
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly jwtService: JwtService,
+    private readonly conexionesService: ConexionesService,
   ) {}
 
-  async create(createUsuarioDto: CreateUsuarioDto) {
+  async create(createUsuarioDto: CreateUsuarioDto, registradoPor: Usuario) {
     // Verificar si el email ya existe
     const existingUser = await this.usuarioRepository.findOne({
       where: { email: createUsuarioDto.email },
@@ -59,6 +61,7 @@ export class UsuariosService {
       const usuario = this.usuarioRepository.create({
         ...userData,
         password: bcrypt.hashSync(password, 10),
+        registradoPor,
       });
 
       await this.usuarioRepository.save(usuario);
@@ -119,6 +122,7 @@ export class UsuariosService {
   async update(
     numeroMita: number,
     updateUsuarioDto: UpdateUsuarioDto,
+    registradoPor: Usuario,
   ): Promise<Usuario> {
     // Verificar si el usuario existe
     const usuario = await this.usuarioRepository.findOne({
@@ -131,11 +135,36 @@ export class UsuariosService {
       );
     }
 
+    // Verificar si el email ya está registrado por otro usuario
+    if (updateUsuarioDto.email) {
+      const existingUser = await this.usuarioRepository.findOne({
+        where: { email: updateUsuarioDto.email },
+      });
+      if (existingUser && existingUser.id !== usuario.id) {
+        throw new BadRequestException(
+          'El email ya está registrado por otro usuario',
+        );
+      }
+    }
+
+    // Verificar si el número Mita ya está registrado por otro usuario
+    if (updateUsuarioDto.numeroMita) {
+      const existingUser = await this.usuarioRepository.findOne({
+        where: { numeroMita: updateUsuarioDto.numeroMita },
+      });
+      if (existingUser && existingUser.id !== usuario.id) {
+        throw new BadRequestException(
+          'El número Mita ya está registrado por otro usuario',
+        );
+      }
+    }
+
     try {
       // Actualizar el usuario con los datos proporcionados
       const usuarioActualizado = await this.usuarioRepository.preload({
         id: usuario.id, // Asegurar que el ID se mantenga
         ...updateUsuarioDto,
+        registradoPor,
       });
 
       if (!usuarioActualizado) {
@@ -173,7 +202,7 @@ export class UsuariosService {
     }
   }
 
-  async login(loginUsuarioDto: LoginUsuarioDto) {
+  async login(loginUsuarioDto: LoginUsuarioDto, ip: string | undefined) {
     const { numeroMita, email, password } = loginUsuarioDto;
 
     let usuario: Usuario | null;
@@ -201,7 +230,19 @@ export class UsuariosService {
       throw new BadRequestException('Credenciales no válidas');
     }
 
+    await this.conexionesService.getGeolocalizacionData(ip, usuario);
+
     // Retornar el JWT de acceso
+    return {
+      ...usuario,
+      token: this.getJwtToken({
+        id: usuario.id,
+        numeroMita: usuario.numeroMita,
+      }),
+    };
+  }
+
+  checkAuthStatus(usuario: Usuario) {
     return {
       ...usuario,
       token: this.getJwtToken({

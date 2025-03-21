@@ -14,26 +14,30 @@ import { Auth } from 'src/usuarios/decorators';
 import { UsuarioRol } from 'src/core/enums/rol.enum';
 
 @Controller('categorias')
-@Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
+@Auth()
 export class CategoriasController {
   constructor(private readonly categoriasService: CategoriasService) {}
 
   @Post()
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
   create(@Body() createCategoriaDto: CreateCategoriaDto) {
     return this.categoriasService.create(createCategoriaDto);
   }
 
   @Get()
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
   findAll() {
     return this.categoriasService.findAll();
   }
 
   @Get(':id')
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
   findOne(@Param('id') id: string) {
     return this.categoriasService.findOne(+id);
   }
 
   @Patch(':id')
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
   update(
     @Param('id') id: string,
     @Body() updateCategoriaDto: UpdateCategoriaDto,
@@ -42,6 +46,7 @@ export class CategoriasController {
   }
 
   @Delete(':id')
+  @Auth(UsuarioRol.ADMIN, UsuarioRol.ARCHIVO)
   remove(@Param('id') id: string) {
     return this.categoriasService.remove(+id);
   }

@@ -1,4 +1,5 @@
 import { Categoria } from 'src/categorias/entities/categoria.entity';
+import { Instrumento } from 'src/instrumentos/entities/instrumento.entity';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import {
   Column,
@@ -17,9 +18,6 @@ export class Partitura {
   @Column({ type: 'varchar', length: 255, nullable: false })
   titulo: string;
 
-  @Column({ type: 'text', nullable: false })
-  descripcion: string;
-
   @Column({ type: 'varchar', length: 255, nullable: false })
   pdf_url: string;
 
@@ -30,6 +28,11 @@ export class Partitura {
     eager: true,
   })
   categoria: Categoria;
+
+  @ManyToOne(() => Instrumento, (instrumento) => instrumento.partituras, {
+    eager: true,
+  })
+  instrumento: Instrumento;
 
   @CreateDateColumn()
   fecha_creacion: Date;

@@ -9,5 +9,6 @@ import { UsuariosModule } from 'src/usuarios/usuarios.module';
   controllers: [InstrumentosController],
   providers: [InstrumentosService],
   imports: [TypeOrmModule.forFeature([Instrumento]), UsuariosModule],
+  exports: [TypeOrmModule],
 })
 export class InstrumentosModule {}

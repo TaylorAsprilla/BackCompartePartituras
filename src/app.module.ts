@@ -9,6 +9,7 @@ import { CategoriasModule } from './categorias/categorias.module';
 import { InstrumentosModule } from './instrumentos/instrumentos.module';
 import { PartiturasModule } from './partituras/partituras.module';
 import { FilesModule } from './files/files.module';
+import { ConexionesModule } from './conexiones/conexiones.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { FilesModule } from './files/files.module';
     InstrumentosModule,
     PartiturasModule,
     FilesModule,
+    ConexionesModule,
   ],
 })
 export class AppModule {}
