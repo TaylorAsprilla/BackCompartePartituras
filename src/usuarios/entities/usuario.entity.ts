@@ -78,6 +78,14 @@ export class Usuario {
   isActive: boolean;
 
   @ApiProperty({
+    description: 'Token de restablecimiento de contraseña',
+    required: false,
+    example: 'some-random-token',
+  })
+  @Column({ nullable: true })
+  resetToken: string;
+
+  @ApiProperty({
     description: 'Fecha de creación del usuario',
     example: '2025-03-18T12:00:00Z',
   })

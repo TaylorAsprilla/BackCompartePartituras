@@ -16,6 +16,8 @@ import { LoginUsuarioDto } from './dto';
 import { JwtPayLoad } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { ConexionesService } from 'src/conexiones/conexiones.service';
+import { EmailService } from 'src/email/email.service';
+import { EmailTemplate } from 'src/email/enums/template.enum';
 
 interface DBError {
   code: string;
@@ -33,6 +35,7 @@ export class UsuariosService {
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly jwtService: JwtService,
     private readonly conexionesService: ConexionesService,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto, registradoPor: Usuario) {
@@ -65,6 +68,18 @@ export class UsuariosService {
       });
 
       await this.usuarioRepository.save(usuario);
+
+      // Enviar correo de bienvenida
+      await this.emailService.sendEmail({
+        to: createUsuarioDto.email,
+        subject: 'Bienvenido a nuestra plataforma',
+        template: EmailTemplate.BIENVENIDA,
+        context: {
+          name: createUsuarioDto.nombre,
+          email: createUsuarioDto.email,
+          password: password, // Solo para contraseñas temporales
+        },
+      });
 
       return {
         ...usuario,
@@ -250,6 +265,48 @@ export class UsuariosService {
         numeroMita: usuario.numeroMita,
       }),
     };
+  }
+
+  async generateResetToken(email: string): Promise<string> {
+    const usuario = await this.usuarioRepository.findOne({ where: { email } });
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    // Generar un token único
+    const token = this.getJwtToken({
+      id: usuario.id,
+      numeroMita: usuario.numeroMita,
+    });
+
+    // Guardar el token en la base de datos
+    usuario.resetToken = token;
+
+    await this.usuarioRepository.save(usuario);
+
+    return token;
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const usuario = await this.usuarioRepository.findOne({
+      where: { resetToken: token },
+    });
+
+    if (!usuario) {
+      throw new Error('Token inválido o expirado');
+    }
+
+    // Hashear la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar la contraseña y limpiar el token
+    usuario.password = hashedPassword;
+    usuario.resetToken = '';
+
+    await this.usuarioRepository.save(usuario);
+
+    // Contraseña Actualizada
   }
 
   private getJwtToken(payload: JwtPayLoad) {

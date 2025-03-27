@@ -87,4 +87,13 @@ export class CreateUsuarioDto {
   @IsNumber()
   @IsOptional()
   registradoPor?: number;
+
+  @ApiProperty({
+    description: 'Token de restablecimiento de contraseña',
+    required: false,
+    example: 'some-random-token',
+  })
+  @IsString()
+  @IsOptional()
+  resetToken?: string;
 }

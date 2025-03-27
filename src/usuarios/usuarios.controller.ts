@@ -18,6 +18,8 @@ import { UsuarioRol } from 'src/core/enums/rol.enum';
 import { Usuario } from './entities/usuario.entity';
 import { ApiResponse } from '@nestjs/swagger';
 import { Request } from 'express';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -140,5 +142,27 @@ export class UsuariosController {
   })
   remove(@Param('numeroMita') numeroMita: string) {
     return this.usuariosService.remove(+numeroMita);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    const { email } = forgotPasswordDto;
+    // Generar un token de restablecimiento
+    const token = await this.usuariosService.generateResetToken(email);
+
+    // Enviar el token por correo electrónico
+
+    return {
+      message:
+        'Se ha enviado un correo con instrucciones para restablecer la contraseña.',
+    };
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    const { token, newPassword } = resetPasswordDto;
+
+    await this.usuariosService.resetPassword(token, newPassword);
+    return { message: 'Contraseña restablecida correctamente.' };
   }
 }

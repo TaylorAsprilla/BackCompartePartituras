@@ -10,6 +10,7 @@ import { InstrumentosModule } from './instrumentos/instrumentos.module';
 import { PartiturasModule } from './partituras/partituras.module';
 import { FilesModule } from './files/files.module';
 import { ConexionesModule } from './conexiones/conexiones.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ConexionesModule } from './conexiones/conexiones.module';
       load: [EnvConfiguration],
       validationSchema: JoiValidationSchema,
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -28,6 +30,7 @@ import { ConexionesModule } from './conexiones/conexiones.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
+
     UsuariosModule,
     CommonModule,
     CategoriasModule,
@@ -35,6 +38,7 @@ import { ConexionesModule } from './conexiones/conexiones.module';
     PartiturasModule,
     FilesModule,
     ConexionesModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

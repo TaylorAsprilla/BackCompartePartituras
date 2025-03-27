@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConexionesModule } from 'src/conexiones/conexiones.module';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   controllers: [UsuariosController],
@@ -26,6 +27,7 @@ import { ConexionesModule } from 'src/conexiones/conexiones.module';
     }),
     UsuariosModule,
     ConexionesModule,
+    EmailModule,
   ],
   exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
 })
